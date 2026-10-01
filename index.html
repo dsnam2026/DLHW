@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>공부해라 우민들아</title>
 
@@ -17,6 +16,9 @@
             padding: 18px;
             margin: 5px;
             background-color: lightgreen;
+            cursor: pointer; /* 마우스를 올렸을 때 클릭 모양으로 바뀌도록 추가 */
+            border: none;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -33,7 +35,8 @@
         Participate in
     </button>
 
-    <button onclick="checkAnswer('It's a breeze')">
+
+    <button onclick="checkAnswer(`It's a breeze`)">
         It's a breeze
     </button>
 
@@ -43,25 +46,17 @@
 
     <h3 id="feedback"></h3>
 
-
     <!-- JavaScript: Change what happens -->
-
     <script>
-
         function checkAnswer(answer) {
-
             if (answer === "It's a breeze") {
                 document.getElementById("feedback").innerText =
                     "Correct! Well done!";
-            }
-
-            else {
+            } else {
                 document.getElementById("feedback").innerText =
                     "Incorrect. The answer is It's a breeze.";
             }
-
         }
-
     </script>
 
 </body>
