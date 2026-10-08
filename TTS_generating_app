@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Earworm — English listening studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --ink:#121826; --muted:#5b6475; --line:#d9dde4;
+  --accent:#0d5c63; --accent-ink:#ffffff; --soft:#e4eff0; --hl:#ffe08a; --hl-ink:#121826; --err:#b42318;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0c1117;--surface:#151c26;--ink:#e9edf3;--muted:#98a2b3;--line:#27303d;
+        --accent:#4cc3cf;--accent-ink:#06242a;--soft:#14303a;--hl:#6b5410;--hl-ink:#fff4cf;--err:#ff8a80}
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding:26px 18px 56px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.logo{width:44px;height:44px;color:var(--accent);flex:none}
+h1{font:700 2.1rem/1.1 "Fraunces",Georgia,serif;margin:0;letter-spacing:-.01em}
+.tag{margin:2px 0 0;color:var(--muted);font-size:.95rem}
+.today{margin-left:auto;text-align:right;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.today b{display:block;color:var(--ink);font-size:1.3rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+h2{font-size:.95rem;margin:0 0 10px;font-weight:700}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.grow{flex:1 1 220px}
+label,.lbl{display:block;font-size:.85rem;color:var(--muted);margin-bottom:5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;padding:10px 16px;min-height:44px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+button,select{font:inherit;color:var(--ink)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 16px;min-height:44px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.w:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:44px}
+.speed{display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;accent-color:var(--accent);min-height:44px}
+.speedval{min-width:3.2em;text-align:right;font-weight:700}
+textarea{width:100%;min-height:120px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);
+  font:500 1.25rem/1.6 "Fraunces",Georgia,serif;padding:12px}
+textarea:read-only{opacity:.8}
+.meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.85rem;margin-top:8px}
+.study{font:500 1.35rem/1.9 "Fraunces",Georgia,serif;white-space:pre-wrap;word-break:break-word;min-height:3.6em}
+.study:empty::before{content:"Your text appears here. Tap any word to hear it on its own.";color:var(--muted);font:400 .95rem "Manrope",sans-serif}
+.w{cursor:pointer;border-radius:4px;padding:1px 2px;margin:0 -2px}
+.w:hover{background:var(--soft)}
+.w.on{background:var(--hl);color:var(--hl-ink)}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700;flex:1 1 150px}
+.primary:hover:not(:disabled){filter:brightness(1.08)}
+.modes{display:grid;gap:10px;margin-top:16px}
+.check{display:flex;align-items:flex-start;gap:10px;margin:0;color:var(--ink);font-size:.95rem}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.check small{display:block;color:var(--muted);font-size:.82rem}
+.status{min-height:1.5em;margin-top:12px;font-weight:500}
+.status.err{color:var(--err)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:40px;padding:8px 14px;border-radius:999px;font-size:.9rem}
+#history{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#history button{width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"Fraunces",Georgia,serif;font-size:1.02rem}
+.foot{color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 44 44" aria-hidden="true">
+      <rect x="4" y="18" width="5" height="8" rx="2.5" fill="currentColor"/>
+      <rect x="13" y="11" width="5" height="22" rx="2.5" fill="currentColor"/>
+      <rect x="22" y="4" width="5" height="36" rx="2.5" fill="currentColor"/>
+      <rect x="31" y="13" width="5" height="18" rx="2.5" fill="currentColor"/>
+      <rect x="40" y="19" width="4" height="6" rx="2" fill="currentColor" opacity=".5"/>
+    </svg>
+    <div>
+      <h1>Earworm</h1>
+      <p class="tag">Hear it. Shadow it. Make it stick.</p>
+    </div>
+    <div class="today"><b id="plays">0</b>plays today</div>
+  </header>
+
+  <section class="card" aria-label="Voice settings">
+    <div class="row">
+      <div>
+        <span class="lbl" id="accLbl">Accent</span>
+        <div class="seg" role="group" aria-labelledby="accLbl">
+          <button type="button" id="accUS" aria-pressed="true">American</button>
+          <button type="button" id="accUK" aria-pressed="false">British</button>
+        </div>
+      </div>
+      <div class="grow">
+        <label for="voice">Voice</label>
+        <select id="voice"></select>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label for="rate">Speed</label>
+      <div class="speed">
+        <input type="range" id="rate" min="0.5" max="1.5" step="0.1" value="1">
+        <span class="speedval" id="rateVal">1.0x</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Text">
+    <label for="text">English text</label>
+    <textarea id="text" spellcheck="false" placeholder="Type or paste English here…">Could we schedule a quick call to align on next steps?</textarea>
+    <div class="meta"><span id="count">0 words</span><span id="dur">~0 sec</span></div>
+  </section>
+
+  <section class="card" aria-label="Study view">
+    <h2>Study view</h2>
+    <div class="study" id="study"></div>
+  </section>
+
+  <section class="card" aria-label="Playback">
+    <div class="controls">
+      <button type="button" class="primary" id="play">Play</button>
+      <button type="button" id="compare">Compare US vs UK</button>
+      <button type="button" id="pause" disabled>Pause</button>
+      <button type="button" id="stop" disabled>Stop</button>
+    </div>
+    <div class="modes">
+      <label class="check"><input type="checkbox" id="shadow"><span>Shadowing pauses<small>Leaves a gap after each sentence so you can repeat it aloud.</small></span></label>
+      <label class="check"><input type="checkbox" id="slow"><span>Slow, then normal<small>Plays each sentence slowly first, then at your chosen speed.</small></span></label>
+      <label class="check"><input type="checkbox" id="loop"><span>Loop<small>Repeats until you press Stop.</small></span></label>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-label="Samples">
+    <h2>Practice samples</h2>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card" aria-label="Recent">
+    <h2>Recent phrases</h2>
+    <ul id="history"></ul>
+  </section>
+
+  <p class="foot">Voices come from your device and browser, so the available voices vary. Shortcuts: Ctrl/⌘ + Enter to play, Esc to stop.</p>
+</div>
+
+<script>
+(function(){
+  var synth = window.speechSynthesis;
+  var $ = function(id){ return document.getElementById(id); };
+  var ta=$('text'), study=$('study'), statusEl=$('status'), voiceSel=$('voice'), rate=$('rate');
+  var playBtn=$('play'), cmpBtn=$('compare'), pauseBtn=$('pause'), stopBtn=$('stop');
+  var LANG={US:/^(en|eng)[-_](US|USA)/i, UK:/^(en|eng)[-_](GB|GBR|UK)/i}, ANY_EN=/^(en|eng)([-_]|$)/i, NAME={US:'American', UK:'British'};
+  var accent='US', run=0, playing=false, paused=false, allVoices=[], words=[], prefVoice={}, onEl=null;
+  var KEY='earworm.v1', data={hist:[], day:'', plays:0};
+
+  function say_status(t,err){ statusEl.textContent=t; statusEl.className='status'+(err?' err':''); }
+
+  if(!synth){ say_status('This browser does not support speech synthesis.',true); playBtn.disabled=true; cmpBtn.disabled=true; return; }
+
+  /* ---------- storage ---------- */
+  try{ var raw=localStorage.getItem(KEY); if(raw) data=JSON.parse(raw); }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} }
+  function today(){ return new Date().toISOString().slice(0,10); }
+  if(data.day!==today()){ data.day=today(); data.plays=0; }
+  function showPlays(){ $('plays').textContent=data.plays; }
+  showPlays();
+
+  /* ---------- text, count, study view ---------- */
+  function render(){
+    var t=ta.value, re=/\S+/g, last=0, m;
+    study.textContent=''; words=[];
+    while((m=re.exec(t))){
+      if(m.index>last) study.appendChild(document.createTextNode(t.slice(last,m.index)));
+      var s=document.createElement('span');
+      s.className='w'; s.textContent=m[0]; s.tabIndex=0; s.setAttribute('role','button');
+      s.dataset.s=m.index; s.dataset.e=m.index+m[0].length;
+      words.push(s); study.appendChild(s); last=re.lastIndex;
+    }
+    var n=words.length;
+    $('count').textContent=n+(n===1?' word':' words');
+    $('dur').textContent='~'+Math.max(0,Math.round(n/2.5/Number(rate.value)))+' sec';
+  }
+  ta.addEventListener('input',render);
+
+  function highlight(idx){
+    for(var i=0;i<words.length;i++){
+      if(idx>=+words[i].dataset.s && idx<+words[i].dataset.e){
+        if(onEl) onEl.classList.remove('on');
+        onEl=words[i]; onEl.classList.add('on');
+        onEl.scrollIntoView({block:'nearest'});
+        return;
+      }
+    }
+  }
+  function clearHl(){ if(onEl){ onEl.classList.remove('on'); onEl=null; } }
+
+  /* ---------- voices & accent ---------- */
+  function voicesFor(a){
+    return allVoices.filter(function(v){ return LANG[a].test(v.lang); })
+      .sort(function(x,y){ return (y.localService?1:0)-(x.localService?1:0); });
+  }
+  function pickVoice(a){
+    var list=voicesFor(a);
+    return list.filter(function(v){ return v.name===prefVoice[a]; })[0] || list[0] || null;
+  }
+  /* English voices only: the chosen accent first, then any other English voice. Never a non-English default. */
+  function candidates(a){
+    var pref=pickVoice(a), list=voicesFor(a).slice();
+    if(pref) list=[pref].concat(list.filter(function(v){ return v!==pref; }));
+    var other=allVoices.filter(function(v){ return ANY_EN.test(v.lang) && list.indexOf(v)<0; })
+      .sort(function(x,y){ return (y.localService?1:0)-(x.localService?1:0); });
+    return list.concat(other);
+  }
+  function fillVoices(){
+    allVoices=synth.getVoices();
+    var list=voicesFor(accent), cur=pickVoice(accent);
+    voiceSel.innerHTML='';
+    if(!list.length){
+      var o=document.createElement('option'); o.textContent='Not installed on this device'; voiceSel.appendChild(o);
+      voiceSel.disabled=true;
+      if(allVoices.length){
+        var alt=candidates(accent)[0];
+        say_status(alt
+          ? 'No '+NAME[accent]+' voice is installed. Will use '+alt.name+' ('+alt.lang+') instead.'
+          : 'No English voice is installed on this device. Install an English (US/UK) voice in your system speech settings.', true);
+      }
+      return;
+    }
+    voiceSel.disabled=false;
+    list.forEach(function(v){
+      var o=document.createElement('option'); o.value=v.name; o.textContent=v.name+(v.localService?'':' (online)'); voiceSel.appendChild(o);
+    });
+    if(cur) voiceSel.value=cur.name;
+  }
+  fillVoices();
+  if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=fillVoices;
+  voiceSel.onchange=function(){ prefVoice[accent]=voiceSel.value; };
+
+  function setAccent(a){
+    accent=a;
+    $('accUS').setAttribute('aria-pressed', a==='US');
+    $('accUK').setAttribute('aria-pressed', a==='UK');
+    say_status(''); fillVoices();
+  }
+  $('accUS').onclick=function(){ setAccent('US'); };
+  $('accUK').onclick=function(){ setAccent('UK'); };
+  rate.oninput=function(){ $('rateVal').textContent=Number(rate.value).toFixed(1)+'x'; render(); };
+
+  /* ---------- speech engine ---------- */
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+  function refreshVoices(){
+    var vs=synth.getVoices(); if(vs.length) allVoices=vs;
+  }
+  async function ensureVoices(){
+    for(var i=0;i<15 && !synth.getVoices().length;i++) await sleep(100);
+    refreshVoices();
+  }
+  function speakOnce(txt,r,onWord,v){
+    return new Promise(function(res){
+      var u=new SpeechSynthesisUtterance(txt);
+      var t0=0, tCall=Date.now(), started=false, done=false, wd=null;
+      function fin(o){ if(done) return; done=true; clearTimeout(wd); res(o); }
+      u.voice=v; u.lang=v.lang.replace('_','-');
+      u.rate=r;
+      u.onstart=function(){ started=true; t0=Date.now(); };
+      u.onboundary=function(e){ if(onWord && e.name!=='sentence') onWord(e.charIndex); };
+      u.onend=function(){
+        if(!started && Date.now()-tCall<200 && txt.length>4) fin({ok:false,err:'no audio'});
+        else fin({ok:true,ms:Date.now()-(t0||tCall)});
+      };
+      u.onerror=function(e){ fin({ok:false,err:e.error||'unknown'}); };
+      wd=setTimeout(function(){ if(!started){ synth.cancel(); fin({ok:false,err:'timeout'}); } },7000);
+      synth.speak(u);
+    });
+  }
+  /* Tries the chosen accent's voices first, then other English voices. Never uses a non-English voice. */
+  async function say(txt,a,r,onWord,my){
+    refreshVoices();
+    var list=candidates(a).slice(0,3), res={ok:false,err:'no English voice installed'};
+    for(var i=0;i<list.length;i++){
+      res=await speakOnce(txt,r,onWord,list[i]);
+      if(my!==undefined && my!==run) return {ok:true,ms:0};
+      if(res.ok) return res;
+      if(res.err==='canceled' || res.err==='interrupted') return {ok:true,ms:0};
+      say_status('Voice problem ('+res.err+'). Trying another English voice…',true);
+      synth.cancel(); await sleep(150);
+      if(my!==undefined && my!==run) return {ok:true,ms:0};
+    }
+    return res;
+  }
+  function wait(ms,my){
+    return new Promise(function(res){
+      (function tick(){
+        if(my!==run || ms<=0) return res();
+        if(!paused) ms-=100;
+        setTimeout(tick,100);
+      })();
+    });
+  }
+  function sentences(t){
+    var out=[], re=/[^.!?]+(?:[.!?]+|$)/g, m;
+    while((m=re.exec(t))){
+      var lead=m[0].length-m[0].replace(/^\s+/,'').length, s=m[0].trim();
+      if(s) out.push({text:s, off:m.index+lead});
+      if(re.lastIndex===m.index) re.lastIndex++;
+    }
+    return out;
+  }
+  function setState(p){
+    playing=p; if(!p) paused=false;
+    playBtn.disabled=p; cmpBtn.disabled=p; stopBtn.disabled=!p; pauseBtn.disabled=!p;
+    pauseBtn.textContent=paused?'Resume':'Pause';
+    ta.readOnly=p;
+  }
+  function stopAll(){
+    run++; if(paused) synth.resume(); synth.cancel(); clearHl(); setState(false);
+  }
+
+  function addHistory(s){
+    data.hist=data.hist.filter(function(h){ return h!==s; });
+    data.hist.unshift(s); data.hist=data.hist.slice(0,6);
+    data.plays++; save(); showPlays(); renderHistory();
+  }
+  function renderHistory(){
+    var ul=$('history'); ul.innerHTML='';
+    if(!data.hist.length){ var li=document.createElement('li'); li.className='foot'; li.textContent='Phrases you play will show up here.'; ul.appendChild(li); return; }
+    data.hist.forEach(function(h){
+      var li=document.createElement('li'), b=document.createElement('button');
+      b.type='button'; b.textContent=h; b.title=h;
+      b.onclick=function(){ ta.value=h; render(); start([accent]); };
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
+
+  async function start(plan){
+    var full=ta.value;
+    if(!full.trim()){ say_status('Type or paste some English first.',true); ta.focus(); return; }
+    var busy=synth.speaking||synth.pending;
+    stopAll();
+    if(busy) await sleep(150);   /* speaking right after cancel() can be dropped by some browsers */
+    await ensureVoices();
+    for(var q=0;q<plan.length;q++){
+      if(!candidates(plan[q]).length){
+        say_status('No English voice is installed on this device, so Earworm will not read this with a non-English voice. Install an English (US/UK) voice in your system speech settings.',true);
+        return;
+      }
+    }
+    var my=++run, list=sentences(full), shadow=$('shadow').checked, slow=$('slow').checked, base=Number(rate.value);
+    addHistory(full.trim()); setState(true);
+    do{
+      for(var p=0;p<plan.length;p++){
+        var a=plan[p];
+        for(var i=0;i<list.length;i++){
+          if(my!==run) return;
+          var rates=slow?[Math.max(0.5,base*0.65), base]:[base], dur=0;
+          for(var k=0;k<rates.length;k++){
+            var pv=candidates(a)[0];
+            say_status(NAME[a]+' · '+(pv?pv.name+' ('+pv.lang+')':'no voice')+' · sentence '+(i+1)+' of '+list.length+(slow&&k===0?' · slow':'')+' · '+rates[k].toFixed(1)+'x');
+            var out=await say(list[i].text,a,rates[k],(function(off){ return function(ci){ highlight(off+ci); }; })(list[i].off),my);
+            if(my!==run) return;
+            if(!out.ok){
+              clearHl(); setState(false);
+              say_status('Playback failed ('+out.err+'). Try another voice, or install English voices in your device’s speech settings.',true);
+              return;
+            }
+            dur=out.ms;
+          }
+          if(shadow){
+            clearHl(); say_status('Your turn: repeat the sentence out loud.');
+            await wait(Math.max(dur,800)*1.2+500, my);
+          }
+        }
+        if(plan.length>1 && p<plan.length-1){ await wait(700,my); }
+      }
+      if($('loop').checked) await wait(600,my);
+    }while($('loop').checked && my===run);
+    if(my===run){ clearHl(); setState(false); say_status('Done. Press Play to go again.'); }
+  }
+
+  /* ---------- controls ---------- */
+  playBtn.onclick=function(){ start([accent]); };
+  cmpBtn.onclick=function(){ start(['US','UK']); };
+  stopBtn.onclick=function(){ stopAll(); say_status('Stopped.'); };
+  pauseBtn.onclick=function(){
+    if(paused){ paused=false; synth.resume(); } else { paused=true; synth.pause(); }
+    pauseBtn.textContent=paused?'Resume':'Pause';
+    say_status(paused?'Paused.':'');
+  };
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); if(!playing) start([accent]); }
+    if(e.key==='Escape' && playing){ stopAll(); say_status('Stopped.'); }
+  });
+
+  /* ---------- tap a word to hear it ---------- */
+  async function speakWord(el){
+    var w=el.textContent.replace(/^[^\w']+|[^\w']+$/g,'');
+    if(!w) return;
+    var busy=synth.speaking||synth.pending;
+    if(playing) stopAll(); else synth.cancel();
+    if(busy) await sleep(150);
+    await ensureVoices();
+    clearHl(); onEl=el; el.classList.add('on');
+    say_status('“'+w+'” · '+NAME[accent]);
+    var out=await say(w,accent,Math.min(Number(rate.value),0.9));
+    if(!out.ok) say_status('Playback failed ('+out.err+').',true);
+    if(onEl===el && !playing) clearHl();
+  }
+  study.addEventListener('click',function(e){ if(e.target.classList.contains('w')) speakWord(e.target); });
+  study.addEventListener('keydown',function(e){
+    if((e.key==='Enter'||e.key===' ') && e.target.classList.contains('w')){ e.preventDefault(); speakWord(e.target); }
+  });
+
+  /* ---------- samples ---------- */
+  var SAMPLES={
+    'Accent test':['Water, tomato and schedule can sound very different in American and British English.','I can’t believe it’s a bit of a lottery whether you say “garage” the same way.'],
+    'Tongue twister':['She sells seashells by the seashore.','Peter Piper picked a peck of pickled peppers.'],
+    'Business call':['Could we schedule a quick call to align on next steps?','Let me circle back with the numbers by the end of the day.'],
+    'Small talk':['How was your weekend? Did you manage to get out of the city?','I’d love a coffee, please, with a splash of milk.'],
+    'Idioms':['Break a leg! You’ve prepared for this moment.','Don’t count your chickens before they hatch.']
+  }, idx={};
+  var chips=$('chips');
+  Object.keys(SAMPLES).forEach(function(k){
+    var b=document.createElement('button'); b.type='button'; b.textContent=k;
+    b.onclick=function(){
+      idx[k]=((idx[k]||0)+1)%SAMPLES[k].length;
+      stopAll(); ta.value=SAMPLES[k][idx[k]]; render(); say_status('Sample loaded. Press Play.');
+    };
+    chips.appendChild(b);
+  });
+
+  render(); renderHistory();
+})();
+</script>
+</body>
+</html>
